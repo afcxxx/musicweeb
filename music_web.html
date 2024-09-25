@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Web</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1c1c1e;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            background-color: #2c2c2e;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #3a3a3c;
+            color: #fff;
+        }
+
+        button {
+            padding: 12px;
+            width: 100%;
+            background-color: #0a84ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        button:hover {
+            background-color: #0067d3;
+        }
+
+        .playlist-item {
+            background-color: #3a3a3c;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+        }
+
+        .playlist-item a {
+            color: #0a84ff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .playlist-item a:hover {
+            text-decoration: underline;
+        }
+
+        .remove-btn {
+            background-color: #ff3b30;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Footer con sello de marca */
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+        }
+
+        /* Diseño responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            input[type="text"], input[type="url"], button {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Music Web</h1>
+
+        <!-- Campo para el nombre de la canción -->
+        <input type="text" id="nameInput" placeholder="Nombre de la canción" />
+
+        <!-- Campo para añadir enlace de video -->
+        <input type="url" id="linkInput" placeholder="Ingresa el enlace del video" />
+        <button id="addButton">Agregar a la Playlist</button>
+
+        <!-- Lista de reproducción -->
+        <div id="playlistContainer"></div>
+    </div>
+
+    <!-- Sello del creador -->
+    <div class="footer">
+        by: afcxx
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const nameInput = document.getElementById('nameInput');
+            const linkInput = document.getElementById('linkInput');
+            const addButton = document.getElementById('addButton');
+            const playlistContainer = document.getElementById('playlistContainer');
+
+            // Cargar la playlist almacenada en localStorage
+            function loadPlaylist() {
+                try {
+                    const storedPlaylist = localStorage.getItem('playlist');
+                    if (storedPlaylist) {
+                        const playlist = JSON.parse(storedPlaylist);
+                        playlist.forEach(item => {
+                            createPlaylistItem(item.name, item.link);
+                        });
+                    }
+                } catch (e) {
+                    alert('Error al cargar la playlist');
+                }
+            }
+
+            // Guardar la playlist en localStorage
+            function savePlaylist() {
+                const playlistItems = document.querySelectorAll('.playlist-item');
+                const playlist = [];
+
+                playlistItems.forEach(item => {
+                    const name = item.querySelector('a').textContent;
+                    const link = item.querySelector('a').href;
+                    playlist.push({ name, link });
+                });
+
+                try {
+                    localStorage.setItem('playlist', JSON.stringify(playlist));
+                } catch (e) {
+                    alert('Error al guardar la playlist');
+                }
+            }
+
+            // Función para crear un nuevo elemento de la playlist
+            function createPlaylistItem(name, link) {
+                const div = document.createElement('div');
+                div.classList.add('playlist-item');
+
+                const anchor = document.createElement('a');
+                anchor.href = link;
+                anchor.textContent = name || link;
+                anchor.target = '_blank';
+
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Eliminar';
+                removeButton.classList.add('remove-btn');
+                removeButton.addEventListener('click', () => {
+                    playlistContainer.removeChild(div);
+                    savePlaylist(); // Actualizar localStorage
+                });
+
+                div.appendChild(anchor);
+                div.appendChild(removeButton);
+                playlistContainer.appendChild(div);
+            }
+
+            // Añadir enlace a la playlist
+            addButton.addEventListener('click', () => {
+                const name = nameInput.value.trim();
+                const link = linkInput.value.trim();
+
+                if (!link) {
+                    alert('Por favor, ingresa un enlace.');
+                    return;
+                }
+
+                createPlaylistItem(name, link);
+                savePlaylist(); // Guardar en localStorage
+
+                nameInput.value = ''; // Limpiar el campo de nombre
+                linkInput.value = ''; // Limpiar el campo de enlace
+            });
+
+            // Cargar la playlist al iniciar la página
+            loadPlaylist();
+        });
+    </script>
+</body>
+</html>
